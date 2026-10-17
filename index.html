@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Реестр поручений</title>
+<style>
+:root{--ink:#192f3e;--muted:#647780;--line:#dce5e8;--blue:#117c78;--bg:#f1f5f5;--red:#b5413c;--navy:#142f40}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid #62b9b2;outline-offset:3px}[hidden]{display:none!important}
+.bar{background:#fff;border-bottom:1px solid var(--line)}
+.bar-inner{max-width:1600px;margin:auto;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:750;letter-spacing:.11em}
+.mark{display:grid;place-items:center;border-radius:12px 12px 12px 3px;width:34px;height:34px;background:var(--navy);color:#8ee1cc;font-size:20px;font-weight:500}
+.local{font-size:12px;color:#50736c;display:flex;gap:8px;align-items:center;background:#f1f7f4;border:1px solid #dfebe4;padding:6px 11px;border-radius:30px}
+.dot{width:6px;height:6px;border-radius:50%;background:#4f9d7b}
+.wrap{max-width:1600px;padding:26px 32px 22px;margin:auto}
+.heading{position:relative;isolation:isolate;overflow:hidden;display:flex;justify-content:space-between;align-items:end;gap:24px;background:var(--navy);border-radius:18px;padding:28px 32px 30px;color:#fff;min-height:165px}
+.heading:after{content:"";position:absolute;z-index:-1;width:440px;height:440px;right:-90px;top:-255px;border:1px solid #ffffff10;border-radius:50%;box-shadow:0 0 0 46px #ffffff03,0 0 0 47px #ffffff08,0 0 0 94px #ffffff02,0 0 0 95px #ffffff08;pointer-events:none}
+.eyebrow{font-size:10px;color:#85d3bf;font-weight:650;letter-spacing:.17em;text-transform:uppercase}
+h1{font-size:38px;font-weight:620;letter-spacing:-.035em;margin:9px 0 10px;line-height:1.2}
+.subtitle{color:#bdcdd5;margin:0;font-size:13px}
+.date{color:#d2e2e6;white-space:nowrap;font-size:12px;padding:7px 12px;border:1px solid #ffffff26;border-radius:7px;margin-bottom:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 26px}
+.stat{position:relative;background:#fff;padding:18px 22px;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 9px #172f4003}
+.stat:after{content:"";position:absolute;right:22px;top:22px;width:9px;height:9px;border-radius:3px;background:#aab8c2}
+.stat-label{color:#5b707b;font-size:12px;font-weight:500}
+.stat-number{display:block;font-size:36px;font-weight:600;letter-spacing:-.04em;line-height:1.1;margin-top:13px;font-variant-numeric:tabular-nums}
+.stat.alert{border-color:#e8cdca;background:#fffaf9}.stat.alert:after{background:#cf776b}.stat.alert .stat-number{color:var(--red)}
+.stat.today:after{background:#3f9f9b}.stat.today .stat-number{color:var(--blue)}
+.stat:last-child:after{background:#7b9d83}.stat:last-child .stat-number{color:#4c795c}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+.panel{border:1px solid var(--line);background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px #173f4e04}
+.list-head{padding:23px 24px 0}
+.title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h2{font-size:18px;margin:0;font-weight:650;letter-spacing:-.02em}
+.count{color:#627881;font-size:11px;background:#f3f6f7;border-radius:6px;padding:5px 8px;white-space:nowrap}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;width:fit-content;background:#f1f5f5;padding:4px;border:1px solid #e8eeee;border-radius:9px;margin:20px 0 18px}
+.tab{border:0;border-radius:6px;color:#5c717b;background:transparent;padding:8px 12px;font-size:12px;transition:background .15s,color .15s}
+.tab:hover{background:#e3eeec;color:#206761}
+.tab[aria-pressed=true]{background:#fff;color:#116f6c;font-weight:650;box-shadow:0 1px 4px #173b4015}
+.filters{display:flex;gap:12px;padding-bottom:22px}.filter{flex:1;min-width:0}
+.filter label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+.filters select{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:9px 11px;font-size:12px;cursor:pointer}
+.table-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#b4c6cc #f4f7f7}
+table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:860px}
+th{text-align:left;color:#657e89;background:#f6f9f9;font-size:9px;letter-spacing:.055em;text-transform:uppercase;font-weight:650;padding:13px 14px;border-block:1px solid var(--line)}
+td{padding:22px 14px;border-bottom:1px solid #eaf0f1;vertical-align:top;overflow-wrap:anywhere;font-size:12px;color:#49616c}
+tbody tr:last-child td{border-bottom:0}tbody tr{transition:background .15s}tbody tr:hover{background:#f6faf9}
+.task-title{font-weight:600;font-size:13px;line-height:1.6;color:#243f4d}
+tr.overdue{background:#fffdfb}tr.overdue td:first-child{box-shadow:inset 3px 0 #c8685e}
+tr.done .task-title{color:#74858c}
+.deadline{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:650;font-size:11px;color:#2d4754}
+.overdue-note{color:var(--red);font-size:10px;display:block;margin-top:5px}.today-note{color:var(--blue);font-size:10px;display:block;margin-top:5px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border-radius:5px;font-size:10px;white-space:nowrap;background:#f0f3f5;color:#5d7180;font-weight:550}
+.badge:before{content:"";flex:none;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.65}
+.badge.working{color:#287b87;background:#eaf5f7}.badge.complete{color:#46775a;background:#edf5ed}
+.edit{color:#197b76;border:1px solid #dbe9e6;background:#f5faf8;border-radius:5px;padding:5px 7px;font-size:10px;font-weight:600;margin-top:-1px}
+.edit:hover{background:#e3f2ed;border-color:#aecfc6}.source{color:#7a8b94;font-size:11px;line-height:1.6}
+.empty{text-align:center;padding:48px 18px;color:var(--muted)}
+.list-foot{padding:16px 24px;background:#fcfdfd;color:#71858e;font-size:10px;border-top:1px solid var(--line);line-height:1.6}
+.form-panel{padding:24px;border-top:3px solid #438d85;background:#fff}
+.form-intro{font-size:12px;color:var(--muted);margin:7px 0 22px;line-height:1.6}
+.field{margin-bottom:15px}.field label{display:block;font-size:11px;font-weight:650;margin-bottom:7px;color:#405965}
+.optional{font-weight:400;color:#7c8c94;font-size:10px;margin-left:3px}
+.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #d8e3e5;border-radius:7px;background:#fbfcfc;color:var(--ink);min-width:0;font-size:12px;transition:border-color .15s,box-shadow .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#6ba79e;box-shadow:0 0 0 3px #157c7310;background:#fff}
+.field textarea{resize:vertical;min-height:90px;line-height:1.7}
+.field input::placeholder,.field textarea::placeholder{color:#82949d}
+.field [aria-invalid=true]{border-color:var(--red);background:#fffafa}
+.error{display:block;font-size:11px;color:var(--red);margin-top:4px}
+.form-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.primary{background:var(--blue);color:white;border:1px solid var(--blue);border-radius:8px;padding:12px;width:100%;font-weight:600;font-size:12px;box-shadow:0 3px 6px #117c7815;transition:background .15s,box-shadow .15s}
+.primary:hover{background:#096b67;box-shadow:0 4px 12px #117c7825}.primary:active{transform:translateY(1px)}
+.cancel{border:1px solid var(--line);border-radius:8px;background:white;color:var(--muted);padding:10px;width:100%;margin-top:8px;font-size:12px}
+.hint{font-size:10px;color:#7a8c94;margin:15px 0 0;line-height:1.7}
+.message{border-radius:8px;padding:12px 16px;margin:0 0 18px;background:#eaf4ef;color:#276448;font-size:13px;border:1px solid #cfe4d9}
+.critical{background:#fff0ef;color:#9d3030;border:1px solid #efcccc}
+.footer{font-size:10px;color:#7b8e97;margin-top:24px;display:flex;justify-content:space-between;gap:20px}.footer span:last-child{white-space:nowrap}
+@media(min-width:1500px){td{font-size:13px}.task-title{font-size:14px}.badge{font-size:11px}.source{font-size:12px}.edit{font-size:11px}.deadline{font-size:12px}}
+@media(max-width:1150px){.workspace{grid-template-columns:minmax(0,1fr) 290px}.wrap,.bar-inner{padding-left:22px;padding-right:22px}.form-panel{padding:20px}.form-pair{grid-template-columns:1fr;gap:0}.heading{padding:26px}}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.form-pair{grid-template-columns:1fr 1fr;gap:12px}.heading{align-items:start}.date{display:none}.stats{gap:10px}.stat{padding:16px}.stat:after{right:16px;top:20px}.footer{display:block}.footer span{display:block;margin-top:6px}}
+@media(max-width:480px){.wrap{padding:18px 14px}.bar-inner{padding:14px}.local{font-size:9px;padding:5px 7px;gap:5px}.brand{font-size:10px;letter-spacing:.06em;gap:8px}.mark{width:28px;height:28px;font-size:17px}.heading{padding:23px 20px;border-radius:13px;min-height:175px}.eyebrow{font-size:8px;letter-spacing:.11em}h1{font-size:30px;margin-top:12px}.subtitle{font-size:12px;max-width:250px}.stats{grid-template-columns:repeat(2,1fr);margin:14px 0 20px}.stat{padding:15px 16px}.stat-number{font-size:30px}.stat-label{font-size:11px}.stat:after{width:6px;height:6px}.list-head{padding:20px 14px 0}.tab{padding:8px 7px;font-size:11px}.tabs{gap:1px;width:100%;justify-content:space-between}.filters{gap:8px}.filters select{font-size:11px;padding:9px 6px}.title-row{align-items:center}h2{font-size:16px}.form-panel{padding:22px 20px}.count{font-size:10px;padding:4px 6px}.list-foot{padding:14px}.workspace{gap:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-inner"><div class="brand"><span class="mark" aria-hidden="true">✓</span> ЛИЧНЫЙ КОНТУР</div><span class="local"><span class="dot" aria-hidden="true"></span> Данные только в браузере</span></div></header>
+<main class="wrap">
+<div class="heading"><div><div class="eyebrow">Поручения · Ответственность · Сроки</div><h1>Реестр поручений</h1><p class="subtitle">Вся картина в одном месте. Главное — что требует внимания.</p></div><div class="date" id="dateLabel"></div></div>
+<section class="stats" aria-label="Обзор поручений"><div class="stat"><span class="stat-label">Незавершённые</span><strong class="stat-number" id="statOpen">0</strong></div><div class="stat alert"><span class="stat-label">Просрочено</span><strong class="stat-number" id="statOverdue">0</strong></div><div class="stat today"><span class="stat-label">Срок сегодня</span><strong class="stat-number" id="statToday">0</strong></div><div class="stat"><span class="stat-label">Выполнено</span><strong class="stat-number" id="statDone">0</strong></div></section>
+<div id="storageAlert" class="message critical" role="alert" hidden></div><div id="notice" class="message" role="status" hidden></div>
+<div class="workspace">
+<section class="panel" aria-labelledby="listTitle"><div class="list-head"><div class="title-row"><h2 id="listTitle">Список поручений</h2><span class="count" id="count"></span></div>
+<div class="tabs" role="group" aria-label="Показать поручения"><button class="tab" data-mode="all" aria-pressed="false">Все</button><button class="tab" data-mode="today" aria-pressed="false">Сегодня</button><button class="tab" data-mode="overdue" aria-pressed="false">Просрочено</button><button class="tab" data-mode="open" aria-pressed="true">Незавершённые</button></div>
+<div class="filters"><div class="filter"><label for="filterOwner">Ответственный</label><select id="filterOwner"><option value="">Все ответственные</option></select></div><div class="filter"><label for="filterObject">Объект или тема</label><select id="filterObject"><option value="">Все объекты</option></select></div></div></div>
+<div class="table-scroll" tabindex="0" aria-label="Таблица поручений, доступна горизонтальная прокрутка"><table><colgroup><col style="width:25%"><col style="width:13%"><col style="width:13%"><col style="width:12%"><col style="width:13%"><col style="width:15%"><col style="width:9%"></colgroup><thead><tr><th scope="col">Поручение</th><th scope="col">Объект</th><th scope="col">Ответственный</th><th scope="col">Срок</th><th scope="col">Статус</th><th scope="col">Источник</th><th scope="col"><span aria-label="Действия">Действия</span></th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="empty" id="empty" hidden>По выбранным фильтрам поручений нет</div><div class="list-foot">Начальные примеры вымышлены и отмечены «Демо». Сводные числа выше учитывают весь реестр.</div></section>
+<aside class="panel form-panel" aria-labelledby="formTitle"><h2 id="formTitle">Новое поручение</h2><p class="form-intro">Зафиксируй результат, ответственного и срок.</p>
+<form id="form" novalidate>
+<div class="field"><label for="title">Что нужно сделать *</label><textarea id="title" required aria-describedby="titleError" placeholder="Например, согласовать график работ"></textarea><span id="titleError" class="error"></span></div>
+<div class="field"><label for="owner">Ответственный *</label><input id="owner" required aria-describedby="ownerError" placeholder="Имя или роль"><span id="ownerError" class="error"></span></div>
+<div class="form-pair"><div class="field"><label for="due">Срок *</label><input id="due" type="date" required aria-describedby="dueError"><span id="dueError" class="error"></span></div><div class="field"><label for="status">Статус</label><select id="status"><option>Не начато</option><option>В работе</option><option>Выполнено</option></select></div></div>
+<div class="field"><label for="object">Объект или тема <span class="optional">необязательно</span></label><input id="object" placeholder="Например, объект А"></div>
+<div class="field"><label for="source">Источник <span class="optional">необязательно</span></label><input id="source" placeholder="Планёрка, заметка или разговор"></div>
+<button class="primary" id="submit" type="submit">Добавить поручение</button><button class="cancel" id="cancel" type="button" hidden>Отмена</button>
+<p class="hint">* Обязательные поля. Используй только вымышленные или обезличенные личные записи.</p></form></aside>
+</div>
+<footer class="footer"><span>Сохраняется в этом браузере на этом устройстве. Очистка данных браузера может удалить реестр.</span><span>Без аккаунта · Без отправки данных</span></footer>
+</main>
+<script>
+(()=>{'use strict';
+const KEY='porucheniya.lesson6.v1',statuses=['Не начато','В работе','Выполнено'];
+const $=id=>document.getElementById(id);let tasks=[],editing=null,mode='open',blocked=false,lastRaw=null;
+function day(date=new Date()){return [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-')}
+function shift(n){const d=new Date();d.setDate(d.getDate()+n);return day(d)}
+function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s)||s.slice(0,4)==='0000')return false;const [y,m,d]=s.split('-').map(Number);const x=new Date(0);x.setFullYear(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d}
+function demo(){return [
+{id:'demo-1',title:'Согласовать график работ на следующую неделю',object:'Объект А',owner:'Алексей (демо)',due:shift(-1),status:'В работе',source:'Демо · планёрка'},
+{id:'demo-2',title:'Уточнить дату поставки оборудования',object:'Объект Б',owner:'Мария (демо)',due:shift(0),status:'Не начато',source:'Демо · заметка'},
+{id:'demo-3',title:'Подготовить перечень открытых замечаний',object:'Объект А',owner:'Алексей (демо)',due:shift(3),status:'Не начато',source:'Демо · обход'},
+{id:'demo-4',title:'Проверить комплектность исходных материалов',object:'Объект Б',owner:'Мария (демо)',due:shift(-1),status:'Выполнено',source:'Демо · встреча'}]}
+function lock(text){blocked=true;$('storageAlert').textContent=text;$('storageAlert').hidden=false;$('submit').disabled=true}
+function save(next){try{if(localStorage.getItem(KEY)!==lastRaw){lock('Реестр изменился в другой вкладке. Текущие изменения не сохранены, новые данные не перезаписаны. Скопируй введённый текст и обнови страницу перед продолжением.');return false}const serialized=JSON.stringify({version:1,tasks:next});localStorage.setItem(KEY,serialized);lastRaw=serialized;return true}catch{lock('Не удалось сохранить данные в браузере. Изменения не сохранены. Проверь разрешение на локальное хранилище и доступное место.');return false}}
+function load(){let raw;try{raw=localStorage.getItem(KEY);lastRaw=raw}catch{lock('Локальное хранилище недоступно. Сохранение заблокировано. Открой файл в обычном окне браузера с разрешённым хранением данных.');return}
+if(raw===null){const initial=demo();if(save(initial))tasks=initial;return}
+try{const value=JSON.parse(raw);if(!value||value.version!==1||!Array.isArray(value.tasks))throw Error();const ids=new Set();for(const t of value.tasks){if(!t||!['id','title','owner','object','due','status','source'].every(k=>typeof t[k]==='string')||!t.id||ids.has(t.id)||!t.title.trim()||!t.owner.trim()||!validDate(t.due)||!statuses.includes(t.status))throw Error();ids.add(t.id)}tasks=value.tasks}catch{lock('Сохранённые данные повреждены или имеют другой формат. Они не перезаписаны. Добавление и изменение заблокированы, чтобы сохранить исходную информацию.')}}
+function matches(t,today=day()){const open=t.status!=='Выполнено';return (mode==='all'||mode==='open'&&open||mode==='today'&&open&&t.due===today||mode==='overdue'&&open&&t.due<today)&&(!$('filterOwner').value||t.owner===$('filterOwner').value)&&(!$('filterObject').value||t.object===$('filterObject').value)}
+function optionList(id,field,label){const select=$(id),previous=select.value;select.replaceChildren(new Option(label,''));[...new Set(tasks.map(t=>t[field]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru')).forEach(x=>select.add(new Option(x,x)));if([...select.options].some(x=>x.value===previous))select.value=previous}
+function node(tag,text,className){const e=document.createElement(tag);e.textContent=text;if(className)e.className=className;return e}
+function render(){const today=day();$('dateLabel').textContent=new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});$('statOpen').textContent=tasks.filter(t=>t.status!=='Выполнено').length;$('statOverdue').textContent=tasks.filter(t=>t.status!=='Выполнено'&&t.due<today).length;$('statToday').textContent=tasks.filter(t=>t.status!=='Выполнено'&&t.due===today).length;$('statDone').textContent=tasks.filter(t=>t.status==='Выполнено').length;
+document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+const visible=tasks.filter(t=>matches(t,today)).sort((a,b)=>a.due.localeCompare(b.due));$('count').textContent=`Показано ${visible.length} из ${tasks.length}`;$('rows').replaceChildren();$('empty').hidden=visible.length>0;
+for(const t of visible){const done=t.status==='Выполнено',late=!done&&t.due<today;const tr=document.createElement('tr');tr.dataset.id=t.id;if(late)tr.className='overdue';else if(done)tr.className='done';tr.append(node('td',t.title,'task-title'),node('td',t.object||'—'),node('td',t.owner));const dateCell=node('td','');dateCell.append(node('span',t.due.split('-').reverse().join('.'),'deadline'));if(late)dateCell.append(node('span','Просрочено','overdue-note'));else if(!done&&t.due===today)dateCell.append(node('span','Сегодня','today-note'));tr.append(dateCell);const statusCell=node('td','');statusCell.append(node('span',t.status,'badge '+(done?'complete':t.status==='В работе'?'working':'')));tr.append(statusCell,node('td',t.source||'—','source'));const action=node('td','');const edit=node('button','Изменить','edit');edit.type='button';edit.disabled=blocked;edit.setAttribute('aria-label','Изменить: '+t.title);edit.addEventListener('click',()=>startEdit(t.id));action.append(edit);tr.append(action);$('rows').append(tr)}}
+function clearErrors(){for(const id of ['title','owner','due']){$(id).removeAttribute('aria-invalid');$(id+'Error').textContent=''}}
+function reset(){editing=null;$('form').reset();clearErrors();$('formTitle').textContent='Новое поручение';$('submit').textContent='Добавить поручение';$('cancel').hidden=true}
+function startEdit(id){if(blocked)return;const t=tasks.find(t=>t.id===id);if(!t)return;editing=id;clearErrors();for(const field of ['title','owner','due','object','status','source'])$(field).value=t[field];$('formTitle').textContent='Изменить поручение';$('submit').textContent='Сохранить изменения';$('cancel').hidden=false;$('notice').hidden=true;$('title').focus();$('formTitle').scrollIntoView({behavior:'smooth',block:'nearest'})}
+$('form').addEventListener('submit',event=>{event.preventDefault();if(blocked)return;clearErrors();$('notice').hidden=true;const t={};for(const f of ['title','owner','due','object','status','source'])t[f]=$(f).value.trim();const errors={};if(!t.title)errors.title='Напиши, что нужно сделать.';if(!t.owner)errors.owner='Укажи ответственного.';if(!validDate(t.due))errors.due='Укажи корректную дату.';for(const [id,message]of Object.entries(errors)){$(id).setAttribute('aria-invalid','true');$(id+'Error').textContent=message}if(Object.keys(errors).length){$(Object.keys(errors)[0]).focus();return}if(!statuses.includes(t.status))return;
+t.id=editing||(typeof crypto.randomUUID==='function'?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));const wasEditing=editing!==null;const next=wasEditing?tasks.map(old=>old.id===editing?t:old):[...tasks,t];if(!save(next)){render();return}tasks=next;optionList('filterOwner','owner','Все ответственные');optionList('filterObject','object','Все объекты');const visible=matches(t);reset();render();$('notice').textContent=(wasEditing?'Изменения сохранены.':'Поручение добавлено.')+(visible?'':' Запись скрыта текущими фильтрами. Выбери «Все» и сбрось фильтры ответственного и объекта.');$('notice').hidden=false});
+$('cancel').addEventListener('click',reset);document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render()}));for(const id of ['filterOwner','filterObject'])$(id).addEventListener('change',render);window.addEventListener('focus',render);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});setInterval(render,60000);
+load();optionList('filterOwner','owner','Все ответственные');optionList('filterObject','object','Все объекты');render();
+})();
+</script>
+</body>
+</html>
